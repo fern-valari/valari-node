@@ -17,15 +17,15 @@ export declare namespace ValariApiClient {
 export class ValariApiClient {
     constructor(private readonly options: ValariApiClient.Options) {}
 
-    #authentication: AuthenticationClient | undefined;
+    private _authentication: AuthenticationClient | undefined;
 
     public get authentication(): AuthenticationClient {
-        return (this.#authentication ??= new AuthenticationClient(this.options));
+        return (this._authentication ??= new AuthenticationClient(this.options));
     }
 
-    #linkSessions: LinkSessionsClient | undefined;
+    private _linkSessions: LinkSessionsClient | undefined;
 
     public get linkSessions(): LinkSessionsClient {
-        return (this.#linkSessions ??= new LinkSessionsClient(this.options));
+        return (this._linkSessions ??= new LinkSessionsClient(this.options));
     }
 }

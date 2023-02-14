@@ -3,7 +3,8 @@
  */
 
 export const ValariApiEnvironment = {
-    Production: "https://sandbox.valari.co/api/v1",
+    Sandbox: "https://sandbox.valari.co/api/v1",
+    Production: "https://app.valari.co/api/v1",
 } as const;
 
-export type ValariApiEnvironment = typeof ValariApiEnvironment.Production;
+export type ValariApiEnvironment = typeof ValariApiEnvironment.Sandbox | typeof ValariApiEnvironment.Production;
