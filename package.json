@@ -1,6 +1,6 @@
 {
     "name": "@fern-api/valari",
-    "version": "0.0.10",
+    "version": "0.0.12",
     "private": false,
     "repository": "https://github.com/fern-valari/valari-node",
     "files": [
