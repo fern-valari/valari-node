@@ -4,8 +4,11 @@
 
 import * as environments from "./environments";
 import * as core from "./core";
-import { Client as AuthenticationClient } from "./api/resources/authentication/client/Client";
-import { Client as LinkSessionsClient } from "./api/resources/linkSessions/client/Client";
+import { ValariApi } from "@fern-api/valari";
+import urlJoin from "url-join";
+import * as serializers from "./serialization";
+import * as errors from "./errors";
+import { Client as LinkSessionClient } from "./api/resources/linkSession/client/Client";
 
 export declare namespace ValariApiClient {
     interface Options {
@@ -17,15 +20,59 @@ export declare namespace ValariApiClient {
 export class ValariApiClient {
     constructor(private readonly options: ValariApiClient.Options) {}
 
-    private _authentication: AuthenticationClient | undefined;
+    /**
+     * Use your Access Credentials to get a Bearer Token
+     * @throws {ValariApi.UnauthorizedError}
+     */
+    public async createToken(request: ValariApi.CreateAuthenticationTokenRequest): Promise<ValariApi.Authentication> {
+        const _response = await core.fetcher({
+            url: urlJoin(this.options.environment ?? environments.ValariApiEnvironment.Production, "/auth/partners"),
+            method: "POST",
+            headers: {
+                Authorization: core.BearerToken.toAuthorizationHeader(await core.Supplier.get(this.options.token)),
+            },
+            body: await serializers.CreateAuthenticationTokenRequest.jsonOrThrow(request),
+        });
+        if (_response.ok) {
+            return await serializers.Authentication.parseOrThrow(_response.body as serializers.Authentication.Raw, {
+                allowUnknownKeys: true,
+            });
+        }
 
-    public get authentication(): AuthenticationClient {
-        return (this._authentication ??= new AuthenticationClient(this.options));
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 404:
+                    throw new ValariApi.UnauthorizedError(
+                        await serializers.ErrorBody.parseOrThrow(_response.error.body as serializers.ErrorBody.Raw, {
+                            allowUnknownKeys: true,
+                        })
+                    );
+                default:
+                    throw new errors.ValariApiError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                    });
+            }
+        }
+
+        switch (_response.error.reason) {
+            case "non-json":
+                throw new errors.ValariApiError({
+                    statusCode: _response.error.statusCode,
+                    body: _response.error.rawBody,
+                });
+            case "timeout":
+                throw new errors.ValariApiTimeoutError();
+            case "unknown":
+                throw new errors.ValariApiError({
+                    message: _response.error.errorMessage,
+                });
+        }
     }
 
-    private _linkSessions: LinkSessionsClient | undefined;
+    private _linkSession: LinkSessionClient | undefined;
 
-    public get linkSessions(): LinkSessionsClient {
-        return (this._linkSessions ??= new LinkSessionsClient(this.options));
+    public get linkSession(): LinkSessionClient {
+        return (this._linkSession ??= new LinkSessionClient(this.options));
     }
 }
