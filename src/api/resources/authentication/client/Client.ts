@@ -23,9 +23,7 @@ export class Client {
      * Use your Access Credentials to get a Bearer Token
      * @throws {ValariApi.UnauthorizedError}
      */
-    public async createAuthenticationToken(
-        request: ValariApi.CreateAuthenticationTokenRequest
-    ): Promise<ValariApi.Authentication> {
+    public async create(request: ValariApi.CreateAuthenticationTokenRequest): Promise<ValariApi.Authentication> {
         const _response = await core.fetcher({
             url: urlJoin(this.options.environment ?? environments.ValariApiEnvironment.Production, "/auth/partners"),
             method: "POST",
