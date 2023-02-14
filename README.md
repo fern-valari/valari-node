@@ -19,13 +19,14 @@ const client = new ValariApiClient({
   token: 'MY_TOKEN',
 });
 
-const response = await client.authentication.create({
-  type: 'my-type',
-  attributes: {
-    partnerId: 'partner_0123456',
-    partnerSecret: 'my-partner-secret',
-    grantType: 'client_credentials',
-    appKey: 'abcd1234',
+const response = await client.linkSession.create({
+  data: {
+    type: 'linkSession',
+    attributes: {
+      ip: '127.0.0.1',
+      successUrl: 'https://myapp.com/success',
+      errorUrl: 'https://myapp.com/error',
+    },
   },
 });
 
